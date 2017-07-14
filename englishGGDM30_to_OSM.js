@@ -26,53 +26,16 @@
  */
 
 //
-// NFDD Conversion - With "English" output
+// Convert GGDMv30 English back to OSM+
 //
 
-// For the OSM+ to NFDD translation
-hoot.require('SchemaTools')
-hoot.require('tds61')
-hoot.require('tds61_schema')
-hoot.require('tds61_rules')
-hoot.require('fcode_common')
-
-// The main translation functions
-hoot.require('etds61')
-hoot.require('etds61_rules')
-
-hoot.require('config')
-hoot.require('translate')
-
-// Create the output Schema - This is not used here. We _do_ use it in the etds functions but
-// we don't need to expose it to the main Hoot program
-function getDbSchema()
-{
-     return tds61.getDbSchema();
-}
-
-// Get raw schema directly from plugins/schema
-function getRawDbSchema()
-{
-     return tds61.schema.getDbSchema();
-}
+hoot.require('eggdm30_osm')
 
 
 function initialize()
 {
     // Turn off the TDS structure so we just get the raw feature
     hoot.Settings.set({"ogr.thematic.structure":"false"});
-
-    // Turn off the tds extra function
-    hoot.Settings.set({"ogr.note.extra":"none"});
-
-    // Turn off the ESRI FCSUBTYPE
-    hoot.Settings.set({"ogr.esri.fcsubtype":"false"});
-
-    // Throw errors instead of returning partial translations/o2s_X features
-    hoot.Settings.set({"ogr.throw.error":"true"});
-
-    // Set the schema type for the export
-    hoot.Settings.set({"osm.map.writer.schema":"TDSv61"});
 }
 
 
@@ -82,12 +45,13 @@ function initialize()
 //
 // This can be called via the following for testing:
 // hoot --convert -D "convert.ops=hoot::TranslationOp"  \ 
-//      -D translation.script=$HOOT_HOME/translations/OSM_to_englishTDS.js <input>.osm <output>.osm
+//      -D translation.script=$HOOT_HOME/translations/NFDD_English.js <input>.osm <output>.osm
 //
 function translateAttributes(attrs, layerName, geometryType)
 {
-    // We use the temp var because etds.toEnglish returns "attrs" and "tableName"
-    var output = etds61.toEnglish(attrs,layerName,geometryType);
+
+    // We use the temp var because nfdd_e.toEnglish returns "attrs" and "tableName"
+    var output = eggdm30_osm.toOSM(attrs, layerName, geometryType);
 
     // Make sure the returned value isn't NULL. This does occur
     if (output)
@@ -98,6 +62,7 @@ function translateAttributes(attrs, layerName, geometryType)
     {
         return null;
     }
+
 } // End of Translate Attributes
 
 
@@ -106,5 +71,11 @@ function translateAttributes(attrs, layerName, geometryType)
 //    This version converts OSM+ tags to NFDD "English" attributes
 function translateToOgr(tags, elementType, geometryType)
 {
-        return etds61.toEnglish(tags, elementType, geometryType)
+        return eggdm30_osm.toOSM(tags, elementType, geometryType)
 } // End of translateToOgr
+
+
+
+
+
+

@@ -26,56 +26,47 @@
  */
 
 //
-// Convert NFDD English back to OSM+
+// Convert GGDMv30 to/from OSM+
 //
 
-hoot.require('etds40_osm')
+hoot.require('SchemaTools');
+hoot.require('ggdm30');
+hoot.require('ggdm30_schema');
+hoot.require('ggdm30_rules');
+hoot.require('config');
+hoot.require('translate');
+hoot.require('fcode_common');
 
-
-function initialize()
+// Layer name filter - Filter out all layers that match this regexp
+function layerNameFilter()
 {
-    // Turn off the TDS structure so we just get the raw feature
-    hoot.Settings.set({"ogr.thematic.structure":"false"});
+    // Drop all of the "SRC_*", "o2s_*" and "extra_*" layers
+    return "^(?!SRC_|o2s_|extra_)";
+}
+
+
+// Create the output Schema
+function getDbSchema()
+{
+    return ggdm30.getDbSchema();
 }
 
 
 // IMPORT
-// translateAttributes - Normally takes 'attrs' and returns OSM 'tags'.  This version
-//    converts OSM+ tags to NFDD "English" Attributes
-//
-// This can be called via the following for testing:
-// hoot --convert -D "convert.ops=hoot::TranslationOp"  \ 
-//      -D translation.script=$HOOT_HOME/translations/NFDD_English.js <input>.osm <output>.osm
-//
-function translateAttributes(attrs, layerName, geometryType)
+// translateAttributes - takes 'attrs' and returns OSM 'tags'
+// function translateAttributes(attrs, layerName, geometryType)
+function translateToOsm(attrs, layerName, geometryType)
 {
-
-    // We use the temp var because nfdd_e.toEnglish returns "attrs" and "tableName"
-    var output = etds40_osm.toOSM(attrs, layerName, geometryType);
-
-    // Make sure the returned value isn't NULL. This does occur
-    if (output)
-    {
-        return output.attrs;
-    }
-    else
-    {
-        return null;
-    }
+    return ggdm30.toOsm(attrs, layerName, geometryType);
 
 } // End of Translate Attributes
 
 
 // EXPORT
 // translateToOgr - takes 'tags' + geometry and returns 'attrs' + tableName
-//    This version converts OSM+ tags to NFDD "English" attributes
 function translateToOgr(tags, elementType, geometryType)
 {
-        return etds40_osm.toOSM(tags, elementType, geometryType)
+    return ggdm30.toOgr(tags, elementType, geometryType)
+
 } // End of translateToOgr
-
-
-
-
-
 
